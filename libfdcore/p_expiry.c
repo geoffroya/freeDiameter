@@ -36,7 +36,7 @@
 #include "fdcore-internal.h"
 
 /* Delay for garbage collection of expired peers, in seconds */
-#define GC_TIME		120
+#define GC_TIME		1
 
 static pthread_t       exp_thr = (pthread_t)NULL;
 static pthread_t       gc_thr  = (pthread_t)NULL;
