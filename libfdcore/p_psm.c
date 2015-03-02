@@ -382,10 +382,17 @@ void cleanup_setstate(void * arg)
 {
 	struct fd_peer * peer = (struct fd_peer *)arg;
 	CHECK_PARAMS_DO( CHECK_PEER(peer), return );
+        CHECK_FCT_DO( pthread_rwlock_wrlock(&fd_g_peers_rw), TRACE_DEBUG(INFO, "An error occurred while locking the peer list"));
 	CHECK_POSIX_DO( pthread_mutex_lock(&peer->p_state_mtx), );
 	peer->p_state = STATE_ZOMBIE;
 	CHECK_POSIX_DO( pthread_mutex_unlock(&peer->p_state_mtx), );
-	return;
+
+
+        TRACE_DEBUG(INFO, "Cleanup: delete zombie peer '%s'", peer->p_hdr.info.pi_diamid);	
+        fd_list_unlink(&peer->p_hdr.chain);
+        CHECK_FCT_DO( fd_peer_free(&peer), /* Continue... what else to do ? */ );
+
+        CHECK_FCT_DO( pthread_rwlock_unlock(&fd_g_peers_rw), TRACE_DEBUG(INFO, "An error occurred while unlocking the peer list"));
 }
 
 /* The state machine thread (controler) */
